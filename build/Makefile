@@ -21,18 +21,25 @@ CPP = $(CROSS_COMPILE)g++
 OBJCOPY = $(CROSS_COMPILE)objcopy
 OBJDUMP = $(CROSS_COMPILE)objdump
 RM = rm
-export CROSS_COMPILE CC AS AR LD CPP OBJCOPY OBJDUMP RM
+CP = cp
+export CROSS_COMPILE CC AS AR LD CPP OBJCOPY OBJDUMP RM CP
 
 # OS Lib
-LIB_PATH :=$(PROJ_LIB)
+LIB_PATH := $(PROJ_LIB)
 LIB_DIR := $(shell find $(LIB_PATH) -not -wholename '*.svn*' -type d)
 LIB_DIR_LDFLAGS := $(foreach dir, $(LIB_DIR), -L$(dir))
-LIBS := $(foreach dir, $(LIB_DIR), $(wildcard $(dir)/*.a))
-LIBDEP = --start-group $(LIBS) --end-group
+#LIBS := $(foreach dir, $(LIB_DIR), $(wildcard $(dir)/*.a))
+#LIBDEP = --start-group $(LIBS) --end-group
+# 依赖顺序, 越底层的库越往后写
+LIBDEP := $(PROJ_LIB)/libmain.a
+LIBDEP += $(PROJ_LIB)/libhello.a
+LIBDEP += $(PROJ_LIB)/libpdc.a
+LIBDEP += $(PROJ_LIB)/libprc.a
+LIBDEP += $(PROJ_LIB)/libosa.a
 
 LDFLAGS := $(LIB_DIR_LDFLAGS)
+LDFLAGS += -Wl,--no-as-needed -lc -lm
 LDFLAGS += -o
-LDFLAGS += -lc
 
 TARGET := $(PROJ_BIN)/App
 #BIN := $(TARGET).bin
@@ -41,19 +48,16 @@ TARGET := $(PROJ_BIN)/App
 .PHONY: clean all
 default: all
 
-pre:
+all: clean
 	@-$(RM) -fr $(TARGET)
-	@-$(RM) -fr $(BIN)
-	@-$(RM) -fr $(MAP)
-
-all: pre
 	$(MAKE) -C $(PROJ_ROOT)/Src/Drv
 	$(MAKE) -C $(PROJ_ROOT)/Src/User
 	$(MAKE) -C $(PROJ_ROOT)/Src/App
-	# LD Target
-	$(LD) $(LDFLAGS) -o $(TARGET) $(LIBDEP)
-	#$(LD) $(LDFLAGS) -Map=$(MAP) -o $(TARGET) $(LIBDEP)
-	#$(OBJCOPY) -O binary $(TARGET) $(BIN)
+#	# LD Target
+#	$(LD) $(LDFLAGS) -o $(TARGET) $(LIBDEP)
+#	$(LD) $(LDFLAGS) -Map=$(MAP) -o $(TARGET) $(LIBDEP)
+#	$(OBJCOPY) -O binary $(TARGET) $(BIN)
+	$(CPP) $(LDFLAGS) $(TARGET) $(LIBDEP)
 
 clean:
 	$(MAKE) -C $(PROJ_ROOT)/Src/Drv clean

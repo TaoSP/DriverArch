@@ -1,0 +1,7 @@
+// Note
+// Author : Huangtao
+// Version: V1.0.0  2020-01-01 Create
+
+// Shell
+1. @-$(RM)  # 命令前面加@, 不显示命令本身; 加-, 忽略这条命令出错
+

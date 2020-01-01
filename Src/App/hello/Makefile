@@ -4,18 +4,16 @@
 # Version: V1.0.0  2020-01-01 Create
 # #####################################################################
 
-MAIN_ROOT = $(shell pwd)
+HELLO_ROOT = $(shell pwd)
 
-CFLAGS := -I$(PROJ_ROOT)/Include/osa
-CFLAGS += -I$(PROJ_ROOT)/Include/pdc
-CFLAGS += -I$(PROJ_ROOT)/Include/app
+CFLAGS := -I$(PROJ_ROOT)/Include/app
 CFLAGS += -c -o
 
 AFLAGS := -rc
 
 SRCS := $(wildcard *.cpp)
 OBJS := $(SRCS:%.cpp=%.o)
-LIB := $(MAIN_ROOT)/libmain.a
+LIB := $(HELLO_ROOT)/libhello.a
 
 .PHONY: clean all
 default: all
@@ -26,13 +24,8 @@ default: all
 $(LIB): $(OBJS)
 	$(AR) $(AFLAGS) $@ $^
 
-app:
-	$(MAKE) -C $(PROJ_ROOT)/Src/App/hello
-
-
-all: app $(LIB)
+all: $(LIB)
 	$(CP) $(LIB) $(PROJ_LIB)
 
 clean:
-	$(MAKE) -C $(PROJ_ROOT)/Src/App/hello clean
 	@-$(RM) $(OBJS) $(LIB)
